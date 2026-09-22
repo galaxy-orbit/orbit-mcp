@@ -1,0 +1,11 @@
+# Smithery configuration — Model Context Protocol server for the Orbit framework
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |-
+    (config) => ({
+      command: 'npx',
+      args: ['-y', '@galaxy-stack/orbit-mcp']
+    })
