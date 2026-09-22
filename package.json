@@ -1,0 +1,57 @@
+{
+  "name": "@galaxy-stack/orbit-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Orbit framework \u2014 AI coding agents get framework knowledge, scaffolding, and security review tools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "orbit-mcp": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun --packages external && bun build ./src/server.ts --outfile ./dist/cli.js --target bun --packages external",
+    "build:types": "tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "start": "bun run src/server.ts",
+    "changeset": "changeset"
+  },
+  "keywords": [
+    "orbit",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "agents",
+    "bun",
+    "nestjs-style"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0",
+    "reflect-metadata": "^0.2.2",
+    "@changesets/cli": "^2.27.0"
+  },
+  "author": "Orbit Team",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaxy-orbit/orbit-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/galaxy-orbit/orbit/issues"
+  },
+  "homepage": "https://galaxy-orbit-framework.vercel.app"
+}
