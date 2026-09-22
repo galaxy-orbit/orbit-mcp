@@ -1,0 +1,19 @@
+{
+  "dxt_version": "0.1",
+  "name": "orbit-mcp",
+  "display_name": "Orbit Framework MCP",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for the Orbit framework — AI coding agents get framework knowledge, scaffolding (REST + GraphQL), and a security review tool.",
+  "author": {
+    "name": "Galaxy Orbit"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/cli.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/cli.js"]
+    }
+  },
+  "keywords": ["orbit", "mcp", "bun", "nestjs-style", "framework"]
+}
