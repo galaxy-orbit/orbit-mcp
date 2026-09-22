@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "orbit-mcp": "dist/cli.js"
+    "orbit-mcp": "./dist/cli.js"
   },
   "exports": {
     ".": {
