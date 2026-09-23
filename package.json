@@ -1,7 +1,7 @@
 {
   "name": "@galaxy-stack/orbit-mcp",
-  "version": "0.1.0",
-  "description": "Model Context Protocol server for Orbit framework — AI coding agents get framework knowledge, scaffolding, and security review tools",
+  "version": "0.1.1",
+  "description": "Model Context Protocol server for Orbit framework \u2014 AI coding agents get framework knowledge, scaffolding, and security review tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
