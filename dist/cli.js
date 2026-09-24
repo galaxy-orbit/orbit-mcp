@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 // @bun
+
 // src/knowledge.ts
 var KNOWLEDGE = [
   {
@@ -442,7 +444,7 @@ export class ${cls}Resolver {
 var PROTOCOL_VERSION = "2025-03-26";
 var SERVER_INFO = {
   name: "@galaxy-stack/orbit-mcp",
-  version: "0.1.0"
+  version: "0.1.3"
 };
 var PROMPTS = [
   {
