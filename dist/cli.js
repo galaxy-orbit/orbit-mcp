@@ -219,11 +219,13 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC \u2014 each in i
 var TOOLS = [
   {
     name: "orbit_knowledge_topics",
+    annotations: { title: "orbit knowledge topics", readOnlyHint: true },
     description: "List all available Orbit framework knowledge topics with summaries.",
     inputSchema: { type: "object", properties: {} }
   },
   {
     name: "orbit_knowledge_read",
+    annotations: { title: "orbit knowledge read", readOnlyHint: true },
     description: "Read one Orbit knowledge topic by id (use orbit_knowledge_topics first).",
     inputSchema: {
       type: "object",
@@ -235,6 +237,7 @@ var TOOLS = [
   },
   {
     name: "orbit_scaffold_module",
+    annotations: { title: "orbit scaffold module", readOnlyHint: true },
     description: "Generate a complete Orbit feature module (module, controller, service, optional Zod DTO and tests) as copy-paste-ready code.",
     inputSchema: {
       type: "object",
@@ -249,6 +252,7 @@ var TOOLS = [
   },
   {
     name: "orbit_scaffold_graphql",
+    annotations: { title: "orbit scaffold graphql", readOnlyHint: true },
     description: "Generate a GraphQL feature: resolver, object types, input types, and module wiring with security limits.",
     inputSchema: {
       type: "object",
@@ -261,6 +265,7 @@ var TOOLS = [
   },
   {
     name: "orbit_security_review",
+    annotations: { title: "orbit security review", readOnlyHint: true },
     description: "Run a static checklist against pasted source code and report missing security hardening with concrete fixes.",
     inputSchema: {
       type: "object",
@@ -444,7 +449,7 @@ export class ${cls}Resolver {
 var PROTOCOL_VERSION = "2025-03-26";
 var SERVER_INFO = {
   name: "@galaxy-stack/orbit-mcp",
-  version: "0.1.3"
+  version: "0.1.5"
 };
 var PROMPTS = [
   {

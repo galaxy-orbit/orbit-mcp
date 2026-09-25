@@ -13,11 +13,13 @@ export interface McpTool {
 export const TOOLS: McpTool[] = [
   {
     name: 'orbit_knowledge_topics',
+    annotations: { title: 'orbit knowledge topics', readOnlyHint: true },
     description: 'List all available Orbit framework knowledge topics with summaries.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'orbit_knowledge_read',
+    annotations: { title: 'orbit knowledge read', readOnlyHint: true },
     description: 'Read one Orbit knowledge topic by id (use orbit_knowledge_topics first).',
     inputSchema: {
       type: 'object',
@@ -29,6 +31,7 @@ export const TOOLS: McpTool[] = [
   },
   {
     name: 'orbit_scaffold_module',
+    annotations: { title: 'orbit scaffold module', readOnlyHint: true },
     description: 'Generate a complete Orbit feature module (module, controller, service, optional Zod DTO and tests) as copy-paste-ready code.',
     inputSchema: {
       type: 'object',
@@ -43,6 +46,7 @@ export const TOOLS: McpTool[] = [
   },
   {
     name: 'orbit_scaffold_graphql',
+    annotations: { title: 'orbit scaffold graphql', readOnlyHint: true },
     description: 'Generate a GraphQL feature: resolver, object types, input types, and module wiring with security limits.',
     inputSchema: {
       type: 'object',
@@ -55,6 +59,7 @@ export const TOOLS: McpTool[] = [
   },
   {
     name: 'orbit_security_review',
+    annotations: { title: 'orbit security review', readOnlyHint: true },
     description: 'Run a static checklist against pasted source code and report missing security hardening with concrete fixes.',
     inputSchema: {
       type: 'object',
