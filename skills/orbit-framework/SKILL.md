@@ -23,7 +23,7 @@ Orbit is a NestJS-style backend framework for Bun. Concept mapping from NestJS:
 3. Every feature is a `@Module({ controllers, providers, exports })` class.
 4. Providers are `@Injectable()` classes injected via constructor.
 5. Validate all external input with Zod schemas through ValidationPipe.
-6. Tests run with `bun test`; e2e tests call `app.handle(new Request(...))`.
+6. Tests run with `bun test`; e2e tests boot a real HTTP server: `OrbitFactory.create(AppModule, { port: 0 })` → `app.listen(0)` → `fetch(\`http://127.0.0.1:${app.port}/…\`)` — `OrbitApplication` has no public `handle()`.
 
 ## Security baseline (non-negotiable for production code)
 
