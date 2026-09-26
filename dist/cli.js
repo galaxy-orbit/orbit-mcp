@@ -150,28 +150,18 @@ export class UserRepository extends Repository<User> {
   {
     id: "testing-pattern",
     title: "Testing",
-    summary: "OrbitFactory.create boots the app in-process; bun:test for unit, e2e via app.handle(Request).",
-    content: `Unit-test providers directly; integration-test through the HTTP surface.
+    summary: "OrbitFactory.create(AppModule, { port: 0 }) boots a real HTTP server; bun:test for unit, e2e via fetch on app.port.",
+    content: `Unit-test providers directly; integration-test through a REAL HTTP server. There is no separate test factory and OrbitApplication has no handle() \u2014 OrbitFactory boots Bun.serve and you fetch it on the ephemeral port:
 
 \`\`\`ts
 import { describe, test, expect } from 'bun:test';
-
-describe('UserService', () => {
-  test('creates a user', () => {
-    const service = new UserService(new InMemoryDb());
-    expect(service.create({ name: 'a' }).id).toBeDefined();
-  });
-});
-\`\`\`
-
-E2E: create the app from the module, boot it in-process, pass a Request. There is no separate test factory \u2014 OrbitFactory IS the test entry point:
-
-\`\`\`ts
 import { OrbitFactory } from '@galaxy-stack/orbit-core';
 
-const app = await OrbitFactory.create(AppModule);
-await app.listen(3000);            // or omit when calling app.handle directly
-const res = await app.handle(new Request('http://localhost/users'));
+const app = await OrbitFactory.create(AppModule, { port: 0 });
+await app.listen(0);
+const base = \`http://127.0.0.1:\${app.port}\`;
+
+const res = await fetch(\`\${base}/api/users\`);
 expect(res.status).toBe(200);
 \`\`\``
   },
@@ -455,7 +445,7 @@ export class ${cls}Resolver {
 var PROTOCOL_VERSION = "2025-03-26";
 var SERVER_INFO = {
   name: "@galaxy-stack/orbit-mcp",
-  version: "0.1.6"
+  version: "0.1.7"
 };
 var PROMPTS = [
   {
