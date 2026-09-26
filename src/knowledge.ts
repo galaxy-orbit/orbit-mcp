@@ -158,8 +158,8 @@ export class UserRepository extends Repository<User> {
   {
     id: 'testing-pattern',
     title: 'Testing',
-    summary: 'OrbitTestFactory boots an isolated app; bun:test for unit, e2e via handle(Request).',
-    content: `Unit-test providers directly; integration-test through the HTTP surface:
+    summary: 'OrbitFactory.create boots the app in-process; bun:test for unit, e2e via app.handle(Request).',
+    content: `Unit-test providers directly; integration-test through the HTTP surface.
 
 \`\`\`ts
 import { describe, test, expect } from 'bun:test';
@@ -172,11 +172,13 @@ describe('UserService', () => {
 });
 \`\`\`
 
-E2E: build the module, get the handler, pass a Request:
+E2E: create the app from the module, boot it in-process, pass a Request. There is no separate test factory — OrbitFactory IS the test entry point:
 
 \`\`\`ts
-const module = await OrbitTestFactory.create(AppModule).compile();
-const app = module.get(OrbitApplication);
+import { OrbitFactory } from '@galaxy-stack/orbit-core';
+
+const app = await OrbitFactory.create(AppModule);
+await app.listen(3000);            // or omit when calling app.handle directly
 const res = await app.handle(new Request('http://localhost/users'));
 expect(res.status).toBe(200);
 \`\`\``,

@@ -76,7 +76,7 @@ function pascal(name: string): string {
   return name.split(/[-_]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 }
 
-const DOCS_STAMP = `> orbit-mcp docs — khớp @galaxy-stack/orbit-core 0.2.x (mcp docs là nguồn chính thức cho API; KHÔNG cần verify lại bằng npm/node_modules).\n`;
+const DOCS_STAMP = `> orbit-mcp docs — nguồn chính thức cho API của @galaxy-stack/orbit-core 0.2.x. Cài đặt: \`bun add @galaxy-stack/orbit-core\` (bun tự chọn version mới nhất, không cần npm view để pin). Sau khi cài, tra exports thật bằng cách đọc .d.ts trong node_modules (được phép) — KHÔNG đọc source .js hay grep cả cây node_modules.\n`;
 
 export function executeTool(name: string, args: Record<string, any>): { content: Array<{ type: 'text'; text: string }>; isError?: boolean } {
   const text = (t: string) => ({ content: [{ type: 'text' as const, text: t }] });

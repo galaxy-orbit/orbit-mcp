@@ -150,8 +150,8 @@ export class UserRepository extends Repository<User> {
   {
     id: "testing-pattern",
     title: "Testing",
-    summary: "OrbitTestFactory boots an isolated app; bun:test for unit, e2e via handle(Request).",
-    content: `Unit-test providers directly; integration-test through the HTTP surface:
+    summary: "OrbitFactory.create boots the app in-process; bun:test for unit, e2e via app.handle(Request).",
+    content: `Unit-test providers directly; integration-test through the HTTP surface.
 
 \`\`\`ts
 import { describe, test, expect } from 'bun:test';
@@ -164,11 +164,13 @@ describe('UserService', () => {
 });
 \`\`\`
 
-E2E: build the module, get the handler, pass a Request:
+E2E: create the app from the module, boot it in-process, pass a Request. There is no separate test factory \u2014 OrbitFactory IS the test entry point:
 
 \`\`\`ts
-const module = await OrbitTestFactory.create(AppModule).compile();
-const app = module.get(OrbitApplication);
+import { OrbitFactory } from '@galaxy-stack/orbit-core';
+
+const app = await OrbitFactory.create(AppModule);
+await app.listen(3000);            // or omit when calling app.handle directly
 const res = await app.handle(new Request('http://localhost/users'));
 expect(res.status).toBe(200);
 \`\`\``
@@ -280,7 +282,7 @@ var TOOLS = [
 function pascal(name) {
   return name.split(/[-_]/).map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("");
 }
-var DOCS_STAMP = `> orbit-mcp docs \u2014 kh\u1EDBp @galaxy-stack/orbit-core 0.2.x (mcp docs l\xE0 ngu\u1ED3n ch\xEDnh th\u1EE9c cho API; KH\xD4NG c\u1EA7n verify l\u1EA1i b\u1EB1ng npm/node_modules).
+var DOCS_STAMP = `> orbit-mcp docs \u2014 ngu\u1ED3n ch\xEDnh th\u1EE9c cho API c\u1EE7a @galaxy-stack/orbit-core 0.2.x. C\xE0i \u0111\u1EB7t: \`bun add @galaxy-stack/orbit-core\` (bun t\u1EF1 ch\u1ECDn version m\u1EDBi nh\u1EA5t, kh\xF4ng c\u1EA7n npm view \u0111\u1EC3 pin). Sau khi c\xE0i, tra exports th\u1EADt b\u1EB1ng c\xE1ch \u0111\u1ECDc .d.ts trong node_modules (\u0111\u01B0\u1EE3c ph\xE9p) \u2014 KH\xD4NG \u0111\u1ECDc source .js hay grep c\u1EA3 c\xE2y node_modules.
 `;
 function executeTool(name, args) {
   const text = (t) => ({ content: [{ type: "text", text: t }] });

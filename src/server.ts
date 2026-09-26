@@ -14,7 +14,7 @@ import { KNOWLEDGE } from './knowledge';
 export const PROTOCOL_VERSION = '2025-03-26';
 export const SERVER_INFO = {
   name: '@galaxy-stack/orbit-mcp',
-  version: '0.1.6',
+  version: '0.1.7',
 };
 
 type JsonRpcId = string | number | null;
