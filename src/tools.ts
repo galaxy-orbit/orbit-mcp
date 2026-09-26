@@ -76,7 +76,7 @@ function pascal(name: string): string {
   return name.split(/[-_]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 }
 
-const DOCS_STAMP = `> orbit-mcp docs — nguồn chính thức cho API của @galaxy-stack/orbit-core 0.2.x. Cài đặt: \`bun add @galaxy-stack/orbit-core\` (bun tự chọn version mới nhất, không cần npm view để pin). Thêm `bun add -d @types/bun` vào devDependencies (types Bun/NodeJS namespace). Bun tự chọn version mới nhất, không cần npm view để pin. Sau khi cài, tra exports thật bằng cách đọc .d.ts/package.json trong node_modules (được phép) — KHÔNG đọc source .js hay grep cả cây node_modules.\n`;
+const DOCS_STAMP = `> orbit-mcp docs — nguồn chính thức cho API của @galaxy-stack/orbit-core 0.2.x. Cài đặt: \`bun add @galaxy-stack/orbit-core\` (bun tự chọn version mới nhất, không cần npm view để pin). Thêm 'bun add -d @types/bun' vào devDependencies (types Bun/NodeJS namespace). Bun tự chọn version mới nhất, không cần npm view để pin. Sau khi cài, tra exports thật bằng cách đọc .d.ts/package.json trong node_modules (được phép) — KHÔNG đọc source .js hay grep cả cây node_modules.\n`;
 
 export function executeTool(name: string, args: Record<string, any>): { content: Array<{ type: 'text'; text: string }>; isError?: boolean } {
   const text = (t: string) => ({ content: [{ type: 'text' as const, text: t }] });
