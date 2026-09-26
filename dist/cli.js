@@ -445,7 +445,7 @@ export class ${cls}Resolver {
 var PROTOCOL_VERSION = "2025-03-26";
 var SERVER_INFO = {
   name: "@galaxy-stack/orbit-mcp",
-  version: "0.1.7"
+  version: "0.1.8"
 };
 var PROMPTS = [
   {
