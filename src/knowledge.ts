@@ -44,7 +44,8 @@ Rules:
     content: `Controllers declare REST routes. Method argument decorators extract request data:
 
 \`\`\`ts
-import { Controller, Get, Post, Body, Param, Query, HttpCode } from '@galaxy-stack/orbit-core';
+import { Controller, Get, Post } from '@galaxy-stack/orbit-core';
+import { Body, Param, Query, HttpCode } from '@galaxy-stack/orbit-common';
 
 @Controller('users')
 export class UserController {
@@ -121,6 +122,37 @@ GraphQLModule.forRoot({
 \`\`\`
 
 Rules run during validation before any resolver executes: depthLimit, complexityLimit (list fan-out multiplier), aliasLimit, blockIntrospection.`,
+  },
+  {
+    id: 'validation-pattern',
+    title: 'Validation with Zod',
+    summary: 'Bind a Zod schema with ZodValidationPipe (or ValidationPipe); @Body has no pipe argument.',
+    content: `Validate request payloads with Zod. The CLI installs zod@4; the framework pipes accept both the Zod v4 \`issues\` and the legacy v3 \`errors\` error shape.
+
+Import sources: decorators \`Controller/Get/Post/Module\` and the pipe classes \`ValidationPipe/ZodValidationPipe\` come from \`@galaxy-stack/orbit-core\`; parameter and method decorators \`Body/Param/Query/HttpCode/UsePipes/UseGuards\` come from \`@galaxy-stack/orbit-common\`. Importing \`Body\` from orbit-core throws "Export named 'Body' not found".
+
+Simple handler — bind the schema to the pipe at method level:
+
+\`\`\`ts
+import { Controller, Post, ZodValidationPipe } from '@galaxy-stack/orbit-core';
+import { Body, UsePipes } from '@galaxy-stack/orbit-common';
+import { z } from 'zod';
+
+const CreateMemberSchema = z.object({ name: z.string().min(2), email: z.string().email() });
+
+@Controller('members')
+export class MembersController {
+  @Post()
+  @UsePipes(new ZodValidationPipe(CreateMemberSchema))
+  create(@Body() dto: z.infer<typeof CreateMemberSchema>) { return this.members.create(dto); }
+}
+\`\`\`
+
+Rules:
+- Do NOT write \`@Body(new ZodValidationPipe(...))\`: \`@Body\` accepts only a field name (\`@Body('name')\`).
+- \`@UsePipes\` is method/class level and runs for EVERY argument of the method. When a handler mixes a validated body with \`@Param\`/\`@Query\` strings, write one scoped pipe that checks \`metadata.type === 'body'\` and returns other argument kinds untouched.
+- \`createZodDto(schema)\` + class-level \`ValidationPipe\` is unreliable on Bun: it reads the parameter metatype from \`design:paramtypes\`, which Bun does not emit, so validation silently does not run. Prefer \`ZodValidationPipe\` or the scoped pipe.
+- Invalid input returns 400 through \`BadRequestException\`.`,
   },
   {
     id: 'security-checklist',
