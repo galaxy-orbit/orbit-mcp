@@ -9,12 +9,25 @@
  */
 
 import { TOOLS, executeTool } from './tools';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 import { KNOWLEDGE } from './knowledge';
+
+function packageVersion(): string {
+  try {
+    const path = fileURLToPath(new URL('../package.json', import.meta.url));
+    const parsed = JSON.parse(readFileSync(path, 'utf8')) as { version?: unknown };
+    return typeof parsed.version === 'string' && parsed.version.length > 0 ? parsed.version : '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
 
 export const PROTOCOL_VERSION = '2025-03-26';
 export const SERVER_INFO = {
   name: '@galaxy-stack/orbit-mcp',
-  version: '0.1.11',
+  version: packageVersion(),
 };
 
 type JsonRpcId = string | number | null;

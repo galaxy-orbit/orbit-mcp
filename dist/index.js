@@ -275,7 +275,7 @@ var TOOLS = [
 function pascal(name) {
   return name.split(/[-_]/).map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("");
 }
-var DOCS_STAMP = `> orbit-mcp docs \u2014 ngu\u1ED3n ch\xEDnh th\u1EE9c cho API c\u1EE7a @galaxy-stack/orbit-core 0.2.x. C\xE0i \u0111\u1EB7t: \`bun add @galaxy-stack/orbit-core\` (bun t\u1EF1 ch\u1ECDn version m\u1EDBi nh\u1EA5t, kh\xF4ng c\u1EA7n npm view \u0111\u1EC3 pin). Th\xEAm 'bun add -d @types/bun' v\xE0o devDependencies (types Bun/NodeJS namespace). Bun t\u1EF1 ch\u1ECDn version m\u1EDBi nh\u1EA5t, kh\xF4ng c\u1EA7n npm view \u0111\u1EC3 pin. Sau khi c\xE0i, tra exports th\u1EADt b\u1EB1ng c\xE1ch \u0111\u1ECDc .d.ts/package.json trong node_modules (\u0111\u01B0\u1EE3c ph\xE9p) \u2014 KH\xD4NG \u0111\u1ECDc source .js hay grep c\u1EA3 c\xE2y node_modules.
+var DOCS_STAMP = `> orbit-mcp docs \u2014 tham kh\u1EA3o Orbit framework knowledge. Sau khi c\xE0i, tra API th\u1EADt c\u1EE7a version \u0111\xE3 c\xE0i b\u1EB1ng c\xE1ch \u0111\u1ECDc .d.ts v\xE0 package.json trong node_modules (\u0111\u01B0\u1EE3c ph\xE9p) \u2014 KH\xD4NG \u0111\u1ECDc source .js hay grep c\u1EA3 c\xE2y node_modules. Version c\u1EE5 th\u1EC3 ph\u1EE5 thu\u1ED9c project, kh\xF4ng hard-code \u1EDF \u0111\xE2y.
 `;
 function executeTool(name, args) {
   const text = (t) => ({ content: [{ type: "text", text: t }] });
@@ -445,10 +445,21 @@ export class ${cls}Resolver {
 }
 
 // src/server.ts
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+function packageVersion() {
+  try {
+    const path = fileURLToPath(new URL("../package.json", import.meta.url));
+    const parsed = JSON.parse(readFileSync(path, "utf8"));
+    return typeof parsed.version === "string" && parsed.version.length > 0 ? parsed.version : "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
 var PROTOCOL_VERSION = "2025-03-26";
 var SERVER_INFO = {
   name: "@galaxy-stack/orbit-mcp",
-  version: "0.1.10"
+  version: packageVersion()
 };
 var PROMPTS = [
   {
