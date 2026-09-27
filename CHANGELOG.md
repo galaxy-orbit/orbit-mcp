@@ -3,6 +3,14 @@
 All notable changes to this package are documented here.
 Releases are versioned with [Changesets](https://github.com/changesets/changesets).
 
+## @galaxy-stack/orbit-mcp@0.1.13
+
+- `McpTool` declares the optional `annotations` field the tool definitions use;
+  `tsc --emitDeclarationOnly` previously failed with TS2353 and emitted no types.
+- `build:types` emits declarations into `dist/` and the publish workflow runs it,
+  so npm ships `dist/index.d.ts`.
+- Add smithery.yaml for Smithery registry publishing and expose a configSchema sample.
+
 ## @galaxy-stack/orbit-mcp@0.1.3
 
 - Fix broken npm bin entry: rebuilt bundles could lose the Node shebang, so the

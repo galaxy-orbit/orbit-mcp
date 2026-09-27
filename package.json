@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-stack/orbit-mcp",
-  "version": "0.1.11",
+  "version": "0.1.13",
   "description": "Model Context Protocol server for Orbit framework — AI coding agents get framework knowledge, scaffolding, and security review tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,7 @@
   "scripts": {
     "build": "bun build ./src/index.ts --outdir ./dist --target bun --packages external --banner '#!/usr/bin/env node' && bun build ./src/server.ts --outfile ./dist/cli.js --target bun --packages external --banner '#!/usr/bin/env node' && node scripts/fix-bin-shebang.mjs",
     "postbuild": "node scripts/fix-bin-shebang.mjs",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "clean": "rm -rf dist",
     "start": "bun run src/server.ts",
     "changeset": "changeset"
