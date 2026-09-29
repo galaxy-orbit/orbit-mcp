@@ -310,6 +310,60 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 - Repositories: prefer the concrete \`DrizzleRepository<T>\` (\`new DrizzleRepository(db, table, Member)\`) over hand-implementing \`BaseRepository<T>\`; the base also declares \`count(where?)\` as abstract, and \`DrizzleRepository\` exposes \`getQueryBuilder()\`, \`getRawDb()\`, \`getTable()\`.
 - Transactions: \`@Transactional()\` on a service method wraps the repository calls inside it.
 - Data source: \`createDataSource(options)\` / \`BunDataSource\`; inject with the \`DATA_SOURCE\` token for the raw handle.
+### Installing and wiring the database layer
+
+\`orbit new\` does **not** install a database layer. When a task needs one, add both
+packages — \`drizzle-orm\` is a **peer dependency** (>=0.29) of \`orbit-database@0.1.x\` and
+nothing works without it:
+
+\`\`\`sh
+bun add @galaxy-stack/orbit-database drizzle-orm
+\`\`\`
+
+Two legitimate shapes:
+
+- **orbit-database + Drizzle** — \`@Entity\`/\`@Column\`, \`DatabaseModule.forRoot/forFeature\`,
+  \`DrizzleRepository\`, \`@Transactional\`.
+- **Plain \`bun:sqlite\`** — \`import { Database } from 'bun:sqlite'\` behind a token provider
+  plus SQL migrations; no peer dependency. Pick one deliberately and say which in the report.
+
+Complete orbit-database wiring, matching the declarations:
+
+\`\`\`ts
+// tables.ts — Drizzle tables come from drizzle-orm; the entity decorators point at them
+import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+export const membersTable = sqliteTable('members', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+});
+
+// member.entity.ts
+@Entity('members')
+export class Member {
+  @PrimaryGeneratedColumn('increment') id!: number;
+  @Column() name!: string;
+}
+
+// members.module.ts
+@Module({
+  imports: [DatabaseModule.forFeature([Member], new Map([[Member, membersTable]]))],
+  controllers: [MembersController],
+  providers: [
+    MembersService,
+    { provide: MemberRepository, useFactory: (db: any) => new MemberRepository(db, membersTable), inject: [DATA_SOURCE] },
+  ],
+})
+export class MembersModule {}
+
+// member.repository.ts — DrizzleRepository(db, table, entityClass)
+export class MemberRepository extends DrizzleRepository<Member> {
+  constructor(db: any, table: any) { super(db, table, Member); }
+}
+\`\`\`
+
+App module: \`DatabaseModule.forRoot({ type: 'sqlite', database: './app.db' })\` (\`database\`, not
+\`url\`, for SQLite; \`:memory:\` works for tests).
+
 ### Compiled against
 
 This map was compiled from the declarations of the versions these projects install:
