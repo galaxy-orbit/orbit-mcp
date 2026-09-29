@@ -284,6 +284,14 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 **@galaxy-stack/orbit-throttler**
 - \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
 
+### Database wiring — the concrete pattern
+
+- SQLite lives in \`database\`, not \`url\`: \`DatabaseModule.forRoot({ type: 'sqlite', database: './app.db' })\` (\`:memory:\` accepted).
+- Feature module: \`DatabaseModule.forFeature([Member], new Map([[Member, 'members']]))\` — entities plus the entity-to-table map, second argument required.
+- Entities: \`@Entity('members')\`, \`@PrimaryGeneratedColumn('increment' | 'uuid')\`, \`@Column({ nullable?: boolean, ... })\`.
+- Repositories: prefer the concrete \`DrizzleRepository<T>\` (\`new DrizzleRepository(db, table, Member)\`) over hand-implementing \`BaseRepository<T>\`; the base also declares \`count(where?)\` as abstract, and \`DrizzleRepository\` exposes \`getQueryBuilder()\`, \`getRawDb()\`, \`getTable()\`.
+- Transactions: \`@Transactional()\` on a service method wraps the repository calls inside it.
+- Data source: \`createDataSource(options)\` / \`BunDataSource\`; inject with the \`DATA_SOURCE\` token for the raw handle.
 ### Signatures agents used to need a declaration read for
 
 - Exceptions (orbit-common): \`new BadRequestException(message?: string | Record<string, unknown>)\`; base \`HttpException(response, status)\`.
