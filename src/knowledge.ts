@@ -284,6 +284,15 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 **@galaxy-stack/orbit-throttler**
 - \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
 
+### Signatures agents used to need a declaration read for
+
+- Exceptions (orbit-common): \`new BadRequestException(message?: string | Record<string, unknown>)\`; base \`HttpException(response, status)\`.
+- Validation: \`ValidationPipe\` / \`ZodValidationPipe\` implement \`PipeTransform\`; a custom pipe gets \`ArgumentMetadata = { type: 'body'|'query'|'param'|'custom', metatype?, data? }\`.
+- Parameters: \`@Body()\`, \`@Query(key?)\`, \`@Param(key?)\`, \`@Headers(key?)\`, \`@Req()/@Res()\`, \`@Ip()\`, \`@Session()\`, \`@UploadedFile(s)()\`.
+- Transforms: \`Transform(fn, { toClassOnly?, toPlainOnly?, groups? })\`, \`ToInt()\`, \`ToFloat()\`, \`ToBoolean()\`, \`ToDate()\`, \`Trim()\`, \`ToArray()\`, \`DefaultValue(v)\`, \`ToLowerCase()\`, \`ToUpperCase()\`.
+- Security: \`SecurityModule.forRoot({ helmet?, csrf?, isGlobal? })\`; \`CsrfOptions = { cookie?, ignoreMethods?, getToken?, sessionKey? }\` (give \`getToken(req)\` when clients cannot carry cookies); helmet CSP/COEP accept \`boolean | options\`.
+- Rate limiting: \`rateLimit({ windowMs?, maxRequests?, keyGenerator?, message?, statusCode?, headers?, skipFailedRequests?, skipSuccessfulRequests?, onLimitReached? })\`; \`tokenBucket(...)\` same shape.
+- Throttler: \`ThrottlerModule.forRoot({ ttl, limit, ignoreUserAgents?, skipIf?, getTracker? })\` - \`ttl\` and \`limit\` are REQUIRED; \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`, \`ThrottleOptions = { limit?, ttl? }\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\`, a plain Error - map it to 429 with \`@Catch(ThrottlerException)\` or clients see a 500.
 If a signature you need is missing here, report it as a knowledge gap instead of silently reading the declarations.`,
   },
 ];
