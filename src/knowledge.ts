@@ -284,6 +284,10 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 **@galaxy-stack/orbit-throttler**
 - \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
 
+### Application API and global registration
+
+- \`OrbitApplication\` (from \`OrbitFactory.create\`) exposes exactly: \`use(middleware, { forRoutes?, exclude? })\`, \`enableCors(CorsOptions?)\`, \`useStaticAssets(Partial<StaticServeOptions>)\`, \`listen(port?)\`, \`close(signal?)\`, \`enableShutdownHooks()\`, \`onShutdown(cb)\`, \`getContainer()\`, \`getServer()\`, \`getRoutes()\`, \`setRoutes()\`, \`setModules()\`, \`setMiddlewareConfigurations()\`.
+- There is NO \`useGlobalPipes\`, \`useGlobalGuards\` or \`useGlobalFilters\`: apply \`@UsePipes\`/\`@UseGuards\`/\`@UseFilters\` on the controller (or a shared base controller) or register the class in the module providers. CORS and static assets are app-level calls.
 ### Middleware, CORS and static serving
 
 - A module registers middleware by implementing \`NestModule\`: \`configure(consumer: MiddlewareConsumer)\` then \`consumer.apply(HelmetMiddleware).forRoutes('*')\`, narrowed with \`.exclude(...)\`; \`apply\` takes \`MiddlewareFunction | MiddlewareClass | GalaxyMiddleware\`.
