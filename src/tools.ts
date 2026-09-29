@@ -77,7 +77,7 @@ function pascal(name: string): string {
   return name.split(/[-_]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 }
 
-const DOCS_STAMP = `> orbit-mcp docs — tham khảo Orbit framework knowledge. Sau khi cài, tra API thật của version đã cài bằng cách đọc .d.ts và package.json trong node_modules (được phép) — KHÔNG đọc source .js hay grep cả cây node_modules. Version cụ thể phụ thuộc project, không hard-code ở đây.\n`;
+const DOCS_STAMP = `> orbit-mcp docs - tra API trong chinh knowledge nay (topic **api-surface** cho toan bo export + signature cua orbit-core/common/database/security/throttler) va trong skill \`orbit-framework\` ma project da cai. Muon biet **version dang cai** thi doc \`package.json\` cua package do trong node_modules (duoc phep). Chi mo \`*.d.ts\` khi can mot signature cu the ma knowledge chua co - va neu phai mo, hay bao lai nhu mot khoang trong de bo sung knowledge, thay vi lang le suy dien. KHONG doc source \`.js\` hay grep ca cay node_modules. Version cu the phu thuoc project, khong hard-code o day.\n`;
 
 export function executeTool(name: string, args: Record<string, any>): { content: Array<{ type: 'text'; text: string }>; isError?: boolean } {
   const text = (t: string) => ({ content: [{ type: 'text' as const, text: t }] });

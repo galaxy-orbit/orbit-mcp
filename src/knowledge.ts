@@ -208,8 +208,10 @@ expect(res.status).toBe(200);
   {
     id: 'package-map',
     title: 'Package map',
-    summary: 'All @galaxy-stack/orbit-* packages and what they provide.',
-    content: `Core: orbit-core (DI, modules, controllers, pipeline), orbit-common (shared utils), orbit-platform-bun (Bun.serve adapter), orbit-config (@galaxy-stack/orbit-config env/config loader), orbit-validation (Zod pipe).
+    summary: 'All @galaxy-stack/orbit-* packages and what they provide. For the export surface of orbit-core/common/database/security/throttler see the api-surface topic.',
+    content: `Export surface: see the **api-surface** topic — it lists what each package exports and the key signatures, so the declarations in node_modules do not have to be read for that.
+
+Core: orbit-core (DI, modules, controllers, pipeline), orbit-common (shared utils), orbit-platform-bun (Bun.serve adapter), orbit-config (@galaxy-stack/orbit-config env/config loader), orbit-validation (Zod pipe).
 
 Data: orbit-database (Drizzle + bun:sqlite), orbit-cache (in-memory/Redis cache manager).
 
@@ -244,6 +246,45 @@ emit = this.client.emit('user.created', data);   // fire-and-forget
 \`\`\`
 
 Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its own @galaxy-stack/orbit-microservices-* package.`,
+  },
+  {
+    id: 'api-surface',
+    title: 'API surface of the core packages',
+    summary: 'What orbit-core, orbit-common, orbit-database, orbit-security and orbit-throttler export, with key signatures.',
+    content: `Compiled from the installed declarations so agents do not have to re-derive it. Installed versions still come from each package's package.json.
+
+**@galaxy-stack/orbit-core**
+- App: \`OrbitFactory.create(AppModule, options?)\` -> \`OrbitApplication\` (\`app.listen()\`, \`app.port\`). Options: \`port\`, \`hostname\`, \`logger\`, \`cors\`, \`security\` (secure response headers ON by default; \`false\` disables). Aliases \`BunFactory\`/\`GalaxyFactory\`.
+- DI/modules: \`Module\`, \`Injectable\`, \`Inject\`, \`Optional\`, \`forwardRef\`, \`Container\`, \`Scope\`, provider shapes.
+- Controllers: \`Controller\`, \`Get|Post|Put|Patch|Delete|Head|Options|All\`, \`HttpMethod\`.
+- Versioning: \`versioningManager.configure({ type: 'uri'|'header'|'media'|'custom', defaultVersion?, header?, key?, prefix? })\`, \`Version\`, \`VERSION_NEUTRAL\`. There is no \`app.setGlobalPrefix\` - the prefix belongs to \`@Controller('api/...')\`.
+- Config: \`ConfigModule\`, \`registerAs\`, \`ConfigService\`, tokens \`CONFIG_OPTIONS\`, \`CONFIGURATION_TOKEN\`, \`CONFIGURATION_SERVICE_TOKEN\`.
+- Cluster/telemetry: \`ClusterManager\`, \`isPrimaryProcess\`, \`isWorkerProcess\`, \`notifyReady\`, \`onShutdown\`; \`onRequestTelemetry\`, \`emitRequestTelemetry\`.
+
+**@galaxy-stack/orbit-common**
+- Parameters: \`Body\`, \`Query\`, \`Param\`, \`Headers\`, \`Req\`/\`Request\`, \`Res\`/\`Response\`, \`Ip\`, \`Session\`, \`UploadedFile(s)\` - these come from orbit-common, NOT orbit-core.
+- Guards/pipes/interceptors/filters: \`UseGuards\`, \`UsePipes\`, \`UseInterceptors\`, \`CanActivate\`, \`PipeTransform\`, \`CallHandler\`, \`OrbitInterceptor\`, \`Catch\`, \`UseFilters\`, \`ExceptionFilter\`, \`ArgumentsHost\`.
+- Response: \`HttpCode\`, \`Header\`, \`Redirect\`, \`Render\`.
+- Transforms: \`Transform\`, \`ToInt\`, \`ToFloat\`, \`ToBoolean\`, \`ToDate\`, \`ToLowerCase\`, \`ToUpperCase\`, \`Trim\`, \`ToArray\`, \`DefaultValue\`.
+- Exceptions: \`HttpException\` plus \`BadRequest|Unauthorized|Forbidden|NotFound|MethodNotAllowed|NotAcceptable|Conflict|Gone|PayloadTooLarge|UnsupportedMediaType|UnprocessableEntity|InternalServerError|NotImplemented|BadGateway|ServiceUnavailable|GatewayTimeout\` and \`Exception\`.
+- Secure headers: \`buildSecureHeaders\`, \`applySecureHeaderRecord\`, \`withSecureHeaders\`.
+
+**@galaxy-stack/orbit-database**
+- \`DatabaseModule.forRoot({ type: 'sqlite'|'postgres'|'mysql'|'libsql'|'mongodb', url?, host?, port?, database?, username?, password?, ssl?, pool?, logging?, isGlobal? })\`; \`forRootAsync({ useFactory, inject, imports, isGlobal })\`; \`forFeature(entities, tableMapping: Map<entity, table>)\` - the second argument is required.
+- Decorators: \`Entity(options|'table')\`, \`Column(options)\`, \`PrimaryKey\`, \`PrimaryGeneratedColumn('increment'|'uuid')\`, \`InjectRepository(Entity)\`, \`Transactional\`.
+- Data source: \`createDataSource(options)\` / \`BunDataSource\`; tokens \`DATABASE_OPTIONS\`, \`DATA_SOURCE\`.
+- Repositories: extend \`BaseRepository<T>\` (or \`DrizzleRepository\`) supplying \`db\`/\`table\`; implement \`findAll/findOne(id)/findBy(where)/create(entity)/update(id, patch)/delete(id)\`; helpers \`getTableName/getPrimaryKey/getColumns\`.
+
+**@galaxy-stack/orbit-security**
+- \`SecurityModule.forRoot({ helmet?, csrf?, isGlobal? })\` / \`forRootAsync({ useFactory, inject, imports, isGlobal })\`; tokens \`HELMET_MIDDLEWARE\`, \`CSRF_MIDDLEWARE\`, \`CRYPTO_UTILS\`, \`SECURITY_MODULE_OPTIONS\`.
+- Rate limiting: \`rateLimit(options?)\` (sliding window), \`tokenBucket(options?)\`.
+- Sanitizing: \`escapeHtml\`, \`sanitizeHtml\`, \`detectSqlInjection\`, \`detectXss\`, \`sanitizeString\`, \`sanitizeObject\`, \`SanitizationPipe\`, \`XssPipe\`, \`SqlInjectionPipe\`.
+- API keys: \`ApiKeyManager\`, \`createApiKeyManager({ prefix?, length?, charset?, expiresIn?, hashAlgorithm? })\`, \`ApiKeyRotationScheduler\`; crypto \`CryptoUtils\`.
+
+**@galaxy-stack/orbit-throttler**
+- \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
+
+If a signature you need is missing here, report it as a knowledge gap instead of silently reading the declarations.`,
   },
 ];
 
