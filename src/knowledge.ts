@@ -284,6 +284,14 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 **@galaxy-stack/orbit-throttler**
 - \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
 
+### Security and throttling wiring - trust the declarations, not the package READMEs
+
+- \`orbit-security/README.md\` shows \`csrf: { enabled, tokenKey, cookieName }\`, but \`CsrfOptions\` is \`{ cookie?: { name?, path?, httpOnly?, secure?, sameSite?, maxAge? }, ignoreMethods?, getToken?, sessionKey? }\` - there is no \`enabled\` flag (omit \`csrf\` to disable) and the cookie name lives in \`cookie.name\`.
+- \`orbit-throttler/README.md\` shows \`new RedisThrottlerStorage(...)\` (the export is \`ThrottlerRedisStorage\`) and a \`throttlers: [...]\` list, but \`ThrottlerModuleOptions\` extends \`ThrottlerOptions\` with only \`storage?\` / \`errorMessage?\` and requires \`ttl\` + \`limit\`.
+- Accurate: \`SecurityModule.forRoot({ helmet: { frameguard: { action: 'deny' } }, csrf: { cookie: { name: 'XSRF-TOKEN', httpOnly: true }, ignoreMethods: ['GET'] } })\` and \`ThrottlerModule.forRoot({ ttl: 60, limit: 100, storage: new ThrottlerMemoryStorage() })\`.
+- Guards: \`@UseGuards(ApiKeyGuard)\` with \`CanActivate.canActivate(context): boolean | Promise<boolean>\`. Filters: \`@Catch(ThrottlerException)\` + \`ExceptionFilter.catch(exception, host)\` applied with \`@UseFilters\` - without it a throttled request becomes a 500.
+- Middleware: a module implements \`configure(consumer: MiddlewareConsumer)\` then \`consumer.apply(HelmetMiddleware).forRoutes('*')\`, narrowed with \`.exclude(...)\`.
+- Custom throttler storage implements \`ThrottlerStorage { increment(key, ttl), get(key), reset(key) }\`.
 ### Database wiring — the concrete pattern
 
 - SQLite lives in \`database\`, not \`url\`: \`DatabaseModule.forRoot({ type: 'sqlite', database: './app.db' })\` (\`:memory:\` accepted).
