@@ -284,6 +284,12 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 **@galaxy-stack/orbit-throttler**
 - \`ThrottlerModule.forRoot(options)\` / \`forRootAsync\`; tokens \`THROTTLER_OPTIONS\`, \`THROTTLER_GUARD\`, \`THROTTLER_STORAGE\`; \`ThrottlerGuard\` rejects with \`ThrottlerException\` (an Error, so an unmapped rejection surfaces as a 500); storage \`ThrottlerMemoryStorage\` / \`ThrottlerRedisStorage\`; decorators \`Throttle(limit, ttl)\`, \`SkipThrottle(skip?)\`.
 
+### Middleware, CORS and static serving
+
+- A module registers middleware by implementing \`NestModule\`: \`configure(consumer: MiddlewareConsumer)\` then \`consumer.apply(HelmetMiddleware).forRoutes('*')\`, narrowed with \`.exclude(...)\`; \`apply\` takes \`MiddlewareFunction | MiddlewareClass | GalaxyMiddleware\`.
+- Middleware class: \`GalaxyMiddleware.use(request: Request, next: () => Promise<Response>): Promise<Response>\` (alias \`OrbitMiddleware\`).
+- \`CorsOptions = { origin?: string | string[] | boolean | ((origin: string) => boolean), methods?, allowedHeaders?, exposedHeaders?, credentials?, maxAge?, preflightContinue?, optionsSuccessStatus? }\`, passed as \`OrbitFactory.create(AppModule, { cors: { ... } })\`.
+- \`StaticServeOptions = { root, prefix?, index?, dotFiles?: 'allow'|'deny'|'ignore', maxAge?, immutable?, etag?, lastModified?, cacheMaxSize?, cacheTtl?, cacheDebug? }\`.
 ### Security and throttling wiring - trust the declarations, not the package READMEs
 
 - \`orbit-security/README.md\` shows \`csrf: { enabled, tokenKey, cookieName }\`, but \`CsrfOptions\` is \`{ cookie?: { name?, path?, httpOnly?, secure?, sameSite?, maxAge? }, ignoreMethods?, getToken?, sessionKey? }\` - there is no \`enabled\` flag (omit \`csrf\` to disable) and the cookie name lives in \`cookie.name\`.
