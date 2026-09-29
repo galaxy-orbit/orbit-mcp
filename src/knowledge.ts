@@ -310,6 +310,37 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 - Repositories: prefer the concrete \`DrizzleRepository<T>\` (\`new DrizzleRepository(db, table, Member)\`) over hand-implementing \`BaseRepository<T>\`; the base also declares \`count(where?)\` as abstract, and \`DrizzleRepository\` exposes \`getQueryBuilder()\`, \`getRawDb()\`, \`getTable()\`.
 - Transactions: \`@Transactional()\` on a service method wraps the repository calls inside it.
 - Data source: \`createDataSource(options)\` / \`BunDataSource\`; inject with the \`DATA_SOURCE\` token for the raw handle.
+### Request pipeline contracts (guards, pipes, interceptors, filters)
+
+These are the exact interfaces the pipeline passes around (from
+\`orbit-core/dist/pipeline/execution-pipeline.d.ts\`, re-exported by \`orbit-common\`):
+
+\`\`\`ts
+interface ExecutionContext {
+  getRequest<T = any>(): T;
+  getResponse<T = any>(): T;
+  getHandler(): Function;
+  getClass(): Type;
+  switchToHttp(): HttpArgumentsHost;      // { getRequest<T>(): T; getResponse<T>(): T }
+}
+interface CanActivate { canActivate(context: ExecutionContext): boolean | Promise<boolean>; }
+interface PipeTransform<T = any, R = any> { transform(value: T, metadata: ArgumentMetadata): R | Promise<R>; }
+interface CallHandler<T = any> { handle(): Promise<T>; }
+interface GalaxyInterceptor<T = any, R = any> { intercept(context: ExecutionContext, next: CallHandler<T>): Promise<R> | R; }
+interface ExceptionFilter<T = any> { catch(exception: T, context: ExecutionContext): any; }
+interface ArgumentMetadata { type: 'body' | 'query' | 'param' | 'custom'; metatype?: Type; data?: string; }
+\`\`\`
+
+- The pipeline hands an **\`ExecutionContext\`** to guards, interceptors and filters — not a
+  Nest \`ArgumentsHost\`. There is **no \`getArgs()\`, \`getArgByIndex()\` or \`switchToRpc()\`**; read the
+  request/response with \`context.getRequest()\` / \`context.getResponse()\` (or
+  \`context.switchToHttp().getResponse()\`), and the handler/class with \`getHandler()\` / \`getClass()\`.
+- A filter's \`catch(exception, context)\` **returns whatever becomes the response** (status/body are
+  derived from what you return, e.g. \`new Response(JSON.stringify({ error }), { status: 429 })\` for a
+  \`ThrottlerException\`).
+- Registration: \`@UseGuards/@UsePipes/@UseInterceptors/@UseFilters\` on the handler or controller, or
+  provider-level classes; \`ExecutionPipeline\` resolves them per controller and caches the metadata.
+
 ### Installing and wiring the database layer
 
 \`orbit new\` does **not** install a database layer. When a task needs one, add both
