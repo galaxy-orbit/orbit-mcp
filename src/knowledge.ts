@@ -310,6 +310,30 @@ Transports: TCP (zero deps), Redis, NATS, RabbitMQ, Kafka, gRPC — each in its 
 - Repositories: prefer the concrete \`DrizzleRepository<T>\` (\`new DrizzleRepository(db, table, Member)\`) over hand-implementing \`BaseRepository<T>\`; the base also declares \`count(where?)\` as abstract, and \`DrizzleRepository\` exposes \`getQueryBuilder()\`, \`getRawDb()\`, \`getTable()\`.
 - Transactions: \`@Transactional()\` on a service method wraps the repository calls inside it.
 - Data source: \`createDataSource(options)\` / \`BunDataSource\`; inject with the \`DATA_SOURCE\` token for the raw handle.
+### Compiled against
+
+This map was compiled from the declarations of the versions these projects install:
+orbit-core@0.2.3, orbit-common@0.1.15, orbit-database@0.1.10, orbit-security@0.1.10,
+orbit-throttler@0.1.10. \`read_file\` on a package's \`package.json\` is still how the
+installed version is confirmed; if it differs from that list, trust the installed
+declarations for the delta and say so in the final report instead of re-reading
+everything.
+
+### Rate limiting and throttling recipes
+
+- App-level limiter (no guard): \`const limiter = rateLimit({ windowMs: 60_000, maxRequests: 100 })\`
+  then mount \`limiter.createMiddleware()\` through the middleware machinery
+  (\`consumer.apply(limiter.createMiddleware()).forRoutes('*')\` or \`app.use(...)\`).
+  \`SlidingWindowRateLimiter\` exposes \`increment(key): boolean\`, \`getInfo(key)\`, \`reset(key)\`,
+  \`destroy()\`; \`tokenBucket()\` returns a \`TokenBucketRateLimiter\` with \`consume(key, tokens?)\`.
+- Route-level throttling: \`ThrottlerModule.forRoot({ ttl: 60, limit: 100 })\` (\`ttl\` and \`limit\`
+  are required) plus \`@UseGuards(ThrottlerGuard)\` on the controller and \`@Throttle(limit, ttl)\` /
+  \`@SkipThrottle()\` per handler.
+- \`ThrottlerGuard\` rejects with \`ThrottlerException\`, a plain \`Error\`: add a
+  \`@Catch(ThrottlerException)\` filter that returns **429**, or the client sees a 500.
+- Custom throttler storage implements \`ThrottlerStorage { increment(key, ttl), get(key), reset(key) }\`;
+  memory storage is the default and \`ThrottlerRedisStorage\` targets Redis.
+
 ### Signatures agents used to need a declaration read for
 
 - Exceptions (orbit-common): \`new BadRequestException(message?: string | Record<string, unknown>)\`; base \`HttpException(response, status)\`.
