@@ -3,6 +3,19 @@
 All notable changes to this package are documented here.
 Releases are versioned with [Changesets](https://github.com/changesets/changesets).
 
+## @galaxy-stack/orbit-mcp@0.3.0
+
+- Generate the `api-surface` topic from the declarations of the nine `@galaxy-stack/orbit-*`
+  packages (487 symbols, one section per package) and commit it; the generator's `--check` mode plus
+  a CI step fail the build when the committed surface drifts from the installed packages. Extending coverage to another package is one line in the generator.
+- Add `orbit_environment` (installed versions next to the versions the surface was generated from)
+  and `orbit_recipe` (one verified wiring recipe per task).
+- `orbit_knowledge_read` gains `symbol` lookup and cross-topic alias routing.
+- Add the `pitfalls` and `absent` topics; move the superseded hand-written export list into the
+  generated topic and the wiring content into `recipes`.
+- Rewrite the bundled `orbit-framework` skill as a rulebook + router (122 lines) that points at the
+  knowledge instead of duplicating it.
+- Tests: 39 unit tests and 23 stdio smoke assertions.
 ## @galaxy-stack/orbit-mcp@0.1.13
 
 - `McpTool` declares the optional `annotations` field the tool definitions use;

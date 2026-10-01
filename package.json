@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-stack/orbit-mcp",
-  "version": "0.1.13",
+  "version": "0.2.0",
   "description": "Model Context Protocol server for Orbit framework — AI coding agents get framework knowledge, scaffolding, and security review tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,12 @@
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "clean": "rm -rf dist",
     "start": "bun run src/server.ts",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "generate:surface": "node scripts/generate-api-surface.mjs",
+    "check:surface": "node scripts/generate-api-surface.mjs --check",
+    "smoke": "node scripts/smoke.mjs",
+    "test:all": "node scripts/generate-api-surface.mjs --check && bun test && node scripts/smoke.mjs"
   },
   "keywords": [
     "orbit",
@@ -35,6 +40,15 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@galaxy-stack/orbit-common": "0.1.15",
+    "@galaxy-stack/orbit-core": "0.2.3",
+    "@galaxy-stack/orbit-database": "0.1.10",
+    "@galaxy-stack/orbit-graphql": "0.1.15",
+    "@galaxy-stack/orbit-microservices": "0.1.10",
+    "@galaxy-stack/orbit-security": "0.1.10",
+    "@galaxy-stack/orbit-swagger": "0.1.11",
+    "@galaxy-stack/orbit-throttler": "0.1.10",
+    "@galaxy-stack/orbit-validation": "0.1.11",
     "@types/bun": "latest",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.0.0"

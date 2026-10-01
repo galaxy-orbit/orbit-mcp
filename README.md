@@ -18,7 +18,9 @@ Orbit MCP turns any AI coding agent (Claude, Cursor, Codex, …) into an Orbit-a
 
 | Capability | Tools / Resources | Purpose |
 |---|---|---|
-| **Knowledge** | `orbit_knowledge_topics`, `orbit_knowledge_read`, `orbit://knowledge/*` | Module/controller/DI/GraphQL/microservices patterns, package map, security checklist |
+| **Knowledge** | `orbit_knowledge_topics`, `orbit_knowledge_read`, `orbit://knowledge/*` | The **generated** export surface of every `@galaxy-stack/orbit-*` package (signatures, interface members, class methods), plus the patterns, the measured pitfalls and the names that do not exist |
+| **Recipes** | `orbit_recipe` | One verified wiring recipe per task (throttle-per-route, database-wiring, migrations, security-baseline, filters, middleware …) |
+| **Environment** | `orbit_environment` | Installed `@galaxy-stack` versions next to the ones the surface was generated from — one call instead of reading `node_modules/**/package.json` |
 | **Scaffolding** | `orbit_scaffold_module`, `orbit_scaffold_graphql` | Generate complete feature modules with validation, guards, and tests |
 | **Security review** | `orbit_security_review` | Static checklist against pasted code — missing validation, guards, rate limits, GraphQL limits, hardcoded secrets, unsanitized HTML |
 | **Prompts** | `build_orbit_feature`, `harden_graphql_api`, `migrate_from_nestjs` | Ready-made task prompts for agents |

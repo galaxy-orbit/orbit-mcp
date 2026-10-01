@@ -21,7 +21,7 @@ describe('orbit-mcp server', () => {
     expect(res.error.code).toBe(-32601);
   });
 
-  test('tools/list includes all five tools with schemas', () => {
+  test('tools/list includes the seven tools with schemas', () => {
     const res = handleRequest({ jsonrpc: '2.0', id: 4, method: 'tools/list' });
     const names = res.result.tools.map((t: any) => t.name);
     expect(names).toEqual([
@@ -30,6 +30,8 @@ describe('orbit-mcp server', () => {
       'orbit_scaffold_module',
       'orbit_scaffold_graphql',
       'orbit_security_review',
+      'orbit_environment',
+      'orbit_recipe',
     ]);
     for (const tool of res.result.tools) {
       expect(tool.inputSchema.type).toBe('object');
@@ -192,5 +194,173 @@ describe('orbit_security_review tool', () => {
       code: "element.innerHTML = userInput;",
     });
     expect(out).toContain('Unsanitized HTML');
+  });
+});
+
+describe('orbit_knowledge_read sections', () => {
+  const call = (args: any) => handleRequest({
+    jsonrpc: '2.0', id: 30, method: 'tools/call',
+    params: { name: 'orbit_knowledge_read', arguments: args },
+  }).result.content[0].text as string;
+
+  test('topic list advertises section ids for the api-surface topic', () => {
+    const out = handleRequest({
+      jsonrpc: '2.0', id: 31, method: 'tools/call',
+      params: { name: 'orbit_knowledge_topics', arguments: {} },
+    }).result.content[0].text as string;
+    const rows = out.split(`\n`);
+    const at = rows.findIndex(l => l.startsWith('- **api-surface**'));
+    const line = rows.slice(at, at + 2).join(' ');
+    expect(line).toBeDefined();
+    expect(line).toContain('sections:');
+    expect(line).toContain('throttler');
+  });
+
+  test('reading one generated package section is much cheaper than the whole topic', () => {
+    const whole = call({ id: 'api-surface' });
+    const part = call({ id: 'api-surface', section: 'orbit-throttler' });
+    expect(part.length).toBeLessThan(whole.length / 4);
+    expect(part).toContain('ThrottlerGuard');
+    expect(part).not.toContain('DatabaseModule');
+  });
+
+  test('a prefix of a generated package section resolves', () => {
+    const exact = call({ id: 'api-surface', section: 'orbit-throttler' });
+    const prefix = call({ id: 'api-surface', section: 'orbit-throttl' });
+    expect(prefix).toBe(exact);
+  });
+
+  test('a recipe alias asked of the api-surface topic is routed to the recipes topic', () => {
+    const routed = call({ id: 'api-surface', section: 'throttler' });
+    expect(routed).toContain('routed to topic "recipes"');
+    expect(routed).toContain('ThrottlerGuard');
+    const direct = call({ id: 'recipes', section: 'throttler' });
+    expect(direct).toContain('ThrottlerGuard');
+  });
+
+  test('a section alias without an id resolves through the cross-topic table', () => {
+    const routed = call({ section: 'database-wiring' });
+    expect(routed).toContain('DatabaseModule');
+    const versions = call({ section: 'versions' });
+    expect(versions).toContain('Generated from:');
+  });
+
+  test('an unknown section lists the available ids instead of failing silently', () => {
+    const out = call({ id: 'api-surface', section: 'nope' });
+    expect(out).toContain('Unknown section');
+    expect(out).toContain('Aliases:');
+    expect(out).toContain('throttler');
+  });
+
+});
+
+describe('orbit_knowledge_read symbol lookup', () => {
+  const call = (args: any) => handleRequest({
+    jsonrpc: '2.0', id: 40, method: 'tools/call',
+    params: { name: 'orbit_knowledge_read', arguments: args },
+  }).result.content[0].text as string;
+
+  test('a known export names its package and shows the declaration line', () => {
+    const out = call({ symbol: 'ThrottlerGuard' });
+    expect(out).toContain('Package: @galaxy-stack/orbit-throttler');
+    expect(out).toContain('class ThrottlerGuard');
+    expect(out).toContain('orbit_knowledge_read({ id: "api-surface", section: "orbit-throttler" })');
+  });
+
+  test('an unknown symbol points at the absent topic instead of guessing', () => {
+    const out = call({ symbol: 'NotFoundError' });
+    expect(out).toContain('is not exported by any @galaxy-stack/orbit-* package');
+    expect(out).toContain('absent');
+  });
+
+  test('an empty call lists the ways to read', () => {
+    const out = call({});
+    expect(out).toContain('Topics:');
+  });
+});
+
+describe('orbit_recipe tool', () => {
+  const call = (args: any) => handleRequest({
+    jsonrpc: '2.0', id: 41, method: 'tools/call',
+    params: { name: 'orbit_recipe', arguments: args },
+  }).result.content[0].text as string;
+
+  test('a task id returns the verified recipe', () => {
+    const out = call({ task: 'throttle-per-route' });
+    expect(out).toContain('ThrottlerModule.forRoot');
+    expect(out).toContain('ThrottlerExceptionFilter');
+  });
+
+  test('a phrase is matched against the task table', () => {
+    const out = call({ task: 'drizzle migrations' });
+    expect(out).toContain('migrate(db');
+  });
+
+  test('an unknown task lists the known ones', () => {
+    const out = call({ task: 'build a rocket' });
+    expect(out).toContain('No recipe matches');
+    expect(out).toContain('throttle-per-route');
+  });
+});
+
+describe('orbit_environment tool', () => {
+  const call = (args: any) => handleRequest({
+    jsonrpc: '2.0', id: 42, method: 'tools/call',
+    params: { name: 'orbit_environment', arguments: args },
+  }).result.content[0].text as string;
+
+  test('reports this repo install against the generated surface', () => {
+    const out = call({});
+    expect(out).toContain('orbit-core@');
+    expect(out).toContain('same as the surface');
+    expect(out).toContain('Generated surface:');
+  });
+
+  test('a root without @galaxy-stack packages says so instead of throwing', () => {
+    const out = call({ projectRoot: '/tmp' });
+    expect(out).toContain('Not installed here: orbit-core');
+    expect(out).toContain('Generated surface:');
+  });
+});
+
+describe('orbit_scaffold_module correctness', () => {
+  const call = (args: any) => handleRequest({
+    jsonrpc: '2.0', id: 40, method: 'tools/call',
+    params: { name: 'orbit_scaffold_module', arguments: args },
+  }).result.content[0].text as string;
+
+  test('never emits the non-existent NotFoundError class', () => {
+    const out = call({ name: 'payments', withTests: true });
+    expect(out).not.toContain('NotFoundError');
+    expect(out).toContain('NotFoundException');
+  });
+
+  test('imports parameter and method decorators from orbit-common, not orbit-core', () => {
+    const out = call({ name: 'payments' });
+    const coreImports = out
+      .split(`\n`)
+      .filter(l => l.includes("from '@galaxy-stack/orbit-core'"));
+    expect(coreImports.length).toBeGreaterThan(0);
+    for (const line of coreImports) {
+      for (const banned of ['Body', 'Param', 'Query', 'HttpCode', 'UsePipes', 'UseGuards', 'HttpException']) {
+        expect(line).not.toMatch(new RegExp(`\\b${banned}\\b`));
+      }
+    }
+    const commonImports = out.split(`\n`).find(l => l.includes("from '@galaxy-stack/orbit-common'")) as string;
+    expect(commonImports).toContain('Body');
+    expect(commonImports).toContain('HttpCode');
+  });
+
+  test('every decorator used in the generated controller is imported', () => {
+    const out = call({ name: 'payments' });
+    const controller = out.slice(out.indexOf('payments.controller.ts'));
+    const used = new Set(controller.match(/@[A-Z][A-Za-z]+/g) ?? []);
+    for (const decorator of used) {
+      const bare = decorator.slice(1);
+      if (bare === 'Module') continue;
+      expect(controller).toContain(bare);
+      const imported = new RegExp(`import[^\n]*\\b${bare}\\b`).test(controller);
+      expect(imported).toBe(true);
+    }
   });
 });

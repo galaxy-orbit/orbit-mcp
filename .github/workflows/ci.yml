@@ -13,5 +13,8 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
+      # The generated API surface is committed: fail when it no longer matches the installed packages.
+      - run: node scripts/generate-api-surface.mjs --check
+      - run: bun run typecheck
       - run: bun test src
-      - run: bun run typecheck || true
+      - run: node scripts/smoke.mjs
