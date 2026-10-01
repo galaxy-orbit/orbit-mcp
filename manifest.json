@@ -7,6 +7,15 @@
   "author": {
     "name": "Galaxy Orbit"
   },
+  "user_config": {
+    "orbitDocsUrl": {
+      "type": "string",
+      "title": "Orbit documentation URL",
+      "description": "Base URL of the documentation site this server points callers at.",
+      "default": "https://galaxy-orbit-framework.vercel.app",
+      "required": false
+    }
+  },
   "server": {
     "type": "node",
     "entry_point": "dist/cli.js",
