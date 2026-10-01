@@ -1,4 +1,7 @@
 import { describe, test, expect } from 'bun:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { handleRequest } from './server';
 
 describe('orbit-mcp server', () => {
@@ -317,9 +320,15 @@ describe('orbit_environment tool', () => {
   });
 
   test('a root without @galaxy-stack packages says so instead of throwing', () => {
-    const out = call({ projectRoot: '/tmp' });
-    expect(out).toContain('Not installed here: orbit-core');
-    expect(out).toContain('Generated surface:');
+    // A fresh directory: /tmp itself can legitimately hold a node_modules from an earlier npx run.
+    const empty = mkdtempSync(join(tmpdir(), 'orbit-mcp-empty-'));
+    try {
+      const out = call({ projectRoot: empty });
+      expect(out).toContain('has no @galaxy-stack packages installed yet');
+      expect(out).toContain('scaffold/install first');
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
   });
 });
 

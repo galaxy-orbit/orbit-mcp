@@ -22,10 +22,16 @@ jobs:
       - run: bun install
       - run: bun run build
       - run: bun run build:types
-      - run: bunx changeset version || echo "no pending changesets"
+      # A failure here used to be swallowed by `|| echo`, which silently turned a broken
+      # release into a green run that published nothing. Fail loudly and print the result.
+      - name: Version the packages from the pending changesets
+        run: |
+          bunx changeset version
+          node -p "'version after changeset version: ' + require('./package.json').version"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Trusted publishing: authenticated via OIDC claims — no NPM_TOKEN needed
-      - run: bunx changeset publish
+      - name: Publish to npm
+        run: bunx changeset publish
         env:
           NPM_CONFIG_PROVENANCE: true
