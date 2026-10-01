@@ -3,6 +3,13 @@
 All notable changes to this package are documented here.
 Releases are versioned with [Changesets](https://github.com/changesets/changesets).
 
+## @galaxy-stack/orbit-mcp@0.3.1
+
+- Repair literal `@@` placeholders that shipped in the generated `api-surface` preamble, the
+  `pitfalls` and `absent` topics and the bundled `orbit-framework` skill; the release tooling had
+  replaced its backtick placeholders in the wrong order. Wording unchanged.
+- Track the released version in `package.json` again (the publish workflow versions the package in
+  CI, so the repository had stayed at 0.2.0 while npm served 0.3.0).
 ## @galaxy-stack/orbit-mcp@0.3.0
 
 - Generate the `api-surface` topic from the declarations of the nine `@galaxy-stack/orbit-*`
