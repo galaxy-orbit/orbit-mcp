@@ -89,15 +89,14 @@ Section aliases (`throttler`, `database`, `security`, `migrations`, `versions`,
 - **Close what you open.** Any script or probe that boots the app or opens the database must close the
   handle and call `process.exit()`, or the command waits until its timeout.
 - **Do not run `bunx @galaxy-stack/orbit-cli@latest`.** `bunx` re-resolves from the registry on
-  every call and stalls for minutes. The `orbit@@ and `nebula@@ binaries are already on `PATH@@.
+  every call and stalls for minutes. The `orbit` and `nebula` binaries are already on `PATH`.
 - **The scaffold tools return text.** `orbit_scaffold_module` / `orbit_scaffold_graphql` never write
   files, and the module scaffold wires no database on purpose.
 
 ## Security baseline
 
-- `SecurityModule.forRoot({ helmet: {}, csrf: { ignoreMethods: ['GET', 'HEAD'] } })` — OWASP headers
-  plus CSRF. `helmet`/`csrf` take an options object or `false@@; passing `{ helmet: true }`
-  is a type error, not a shortcut.
+- `SecurityModule.forRoot({ helmet: {}, csrf: { ignoreMethods: ['GET', 'HEAD'] } })` — OWASP headers plus CSRF.
+  `helmet`/`csrf` take an options object or `false`; `{ helmet: true }` is a type error, never a shortcut.
 - Rate limiting on auth and write routes: `orbit_recipe { task: "throttle-per-route" }`.
 - GraphQL: introspection off in production, `security: { maxDepth: 10, maxComplexity: 1000, maxAliases: 30 }`.
 - Never log secrets; sanitize any stored HTML with the `orbit-security` sanitizer.
@@ -105,11 +104,11 @@ Section aliases (`throttler`, `database`, `security`, `migrations`, `versions`,
 
 ## Verification checklist (run before declaring done)
 
-1. `validate_project@@ passes for the packages you touched.
+1. `validate_project` passes for the packages you touched.
 2. A dev server is not verification evidence. When the task explicitly asks to exercise a running app,
-   start it detached with `run_command@@ (log outside the workspace), probe it with a bounded
+   start it detached with `run_command` (log outside the workspace), probe it with a bounded
    `curl` loop, and stop it before the final validation. This catalog has **no**
-   `manage_session@@ / preview / browser tool — do not spend turns searching for one.
+   `manage_session` / preview / browser tool — do not spend turns searching for one.
 3. Mutating routes have validation and auth; rate limiting where it matters.
 4. GraphQL modules have security limits; no secrets in source.
 

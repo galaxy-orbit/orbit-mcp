@@ -174,7 +174,7 @@ function build() {
     '### ' + entry.name + '\n_@galaxy-stack/' + entry.name + '@' + entry.version + ' — ' + entry.names.length + ' exported symbols, copied from its dist/*.d.ts._\n\n' + entry.body,
   );
   const preamble = [
-    'The complete public surface of every `@galaxy-stack/orbit-*` package, **generated from the declarations of the installed packages** by `scripts/generate-api-surface.mjs`, so it cannot drift from the versions listed at the end. Read the section for the package you need — or pass `symbol@@ to jump straight to one symbol — instead of opening `node_modules/**/*.d.ts`.',
+    'The complete public surface of every `@galaxy-stack/orbit-*` package, **generated from the declarations of the installed packages** by `scripts/generate-api-surface.mjs`, so it cannot drift from the versions listed at the end. Read the section for the package you need — or pass `symbol` to jump straight to one symbol — instead of opening `node_modules/**/*.d.ts`.',
     '',
     'Each line is a real declaration: signatures for functions and classes, member names for interfaces (a trailing `?` marks an optional member) and methods for classes. It is an inventory, not a tutorial: wiring recipes, runtime behaviour that differs from these declarations, and the symbols that do **not** exist live in the other topics (`pitfalls`, `absent`, `recipes`).',
     '',

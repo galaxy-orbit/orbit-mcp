@@ -555,10 +555,10 @@ There is no \`useGlobalPipes\` / \`useGlobalGuards\` / \`useGlobalFilters\`. Use
 \`orbit_scaffold_module\` and \`orbit_scaffold_graphql\` generate copy-paste-ready code; they never write files. The module scaffold wires no database on purpose - follow the recipes topic for the real wiring.
 
 ### Never run bunx @galaxy-stack/orbit-cli@latest
-\`bunx\` re-resolves from the registry on every call and stalls for minutes when it is slow. The \`orbit@@ and \`nebula@@ binaries are already on \`PATH@@.
+\`bunx\` re-resolves from the registry on every call and stalls for minutes when it is slow. The \`orbit\` and \`nebula\` binaries are already on \`PATH\`.
 
 ### Processes that boot a server or open the database must exit
-Close the handle (\`sqlite.close()\`) and call \`process.exit()\` in any script or probe that boots the app, or \`run_command@@ waits until its timeout - measured: a boot probe without a close burned the full 120s.
+Close the handle (\`sqlite.close()\`) and call \`process.exit()\` in any script or probe that boots the app, or \`run_command\` waits until its timeout - measured: a boot probe without a close burned the full 120s.
 
 ### The package READMEs contradict their own types
 \`trust the declarations, not the READMEs\` is literal: \`security/README.md\` teaches \`csrf: { enabled, tokenKey, cookieName }\` and \`throttler/README.md\` teaches \`throttlers: [...]\` and \`RedisThrottlerStorage\`; none of those exist. The generated api-surface topic is the authority.`,
@@ -585,7 +585,7 @@ Close the handle (\`sqlite.close()\`) and call \`process.exit()\` in any script 
 - \`@Body(new ZodValidationPipe(schema))\` - \`@Body\` takes an optional field name only; put the pipe at method level with \`@UsePipes(...)\`.
 
 ### Capabilities this CLI does not have
-- There is no \`manage_session\`, \`preview\` or browser/perception tool in the catalog. To exercise a running app, start it detached with \`run_command@@ and probe it with \`curl\`, then stop it.
+- There is no \`manage_session\`, \`preview\` or browser/perception tool in the catalog. To exercise a running app, start it detached with \`run_command\` and probe it with \`curl\`, then stop it.
 - The scaffold flag \`withDatabase\` does not exist (it never did anything); wire the database with \`DatabaseModule\` + \`DrizzleRepository\` per the recipes topic.`,
   },
 ];
