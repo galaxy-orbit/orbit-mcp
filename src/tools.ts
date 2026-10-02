@@ -25,17 +25,20 @@ export const TOOLS: McpTool[] = [
     name: 'orbit_knowledge_read',
     annotations: { title: 'orbit knowledge read', readOnlyHint: true },
     description:
-      'Read one Orbit knowledge topic by id (use orbit_knowledge_topics first). Pass section to fetch only one part of a large topic, which is much cheaper after a context compaction.',
+      'Read Orbit knowledge. Pass id for a topic, id+section for one section of it, section alone for a short alias such as throttler or database, or symbol for a single export. Start with orbit_knowledge_topics. Nothing is strictly required, but pass at least one of id, section or symbol.',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Topic id from orbit_knowledge_topics' },
+        id: { type: 'string', description: 'Topic id from orbit_knowledge_topics; optional when section or symbol is given.' },
         section: {
           type: 'string',
-          description: 'Optional section id from orbit_knowledge_topics, e.g. throttler or database. Omit for the whole topic.',
+          description: 'Section id, or a short alias such as throttler, database, migrations or security. Works with or without id.',
+        },
+        symbol: {
+          type: 'string',
+          description: 'One exported symbol, e.g. ThrottlerGuard; answers with its package and the declaration line.',
         },
       },
-      required: ['id'],
     },
   },
   {

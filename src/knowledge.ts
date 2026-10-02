@@ -171,7 +171,7 @@ Rules:
     summary: 'Helmet headers, CSRF, rate limiting, validation, GraphQL query limits, JWT auth.',
     content: `Minimum hardening for an Orbit backend:
 
-1. SecurityModule.forRoot({ helmet: {}, csrf: { ignoreMethods: ['GET', 'HEAD'] } }) — sets OWASP-recommended headers (HSTS, nosniff, frameguard, COOP/CORP) and double-submit CSRF. Both options are objects-or-false, never \`true\`: \`helmet?: HelmetOptions | false\`, \`csrf?: CsrfOptions | false\`. Writing \`{ helmet: true, csrf: true }\` is a type error.
+1. SecurityModule.forRoot({ helmet: {}, csrf: { ignoreMethods: ['GET', 'HEAD'] } }) — sets OWASP-recommended headers (HSTS, nosniff, frameguard, COOP/CORP) and double-submit CSRF. Both options are objects-or-false, never \`true\`: \`helmet?: HelmetOptions | false\`, \`csrf?: CsrfOptions | false\`. Writing \`{ helmet: true, csrf: true }\` is a type error.\n   The members of every option interface are in the generated surface: read \`{ symbol: 'SecurityModuleOptions' }\`, \`{ symbol: 'CsrfOptions' }\`, \`{ symbol: 'HelmetOptions' }\` or \`{ symbol: 'CorsOptions' }\` — do not grep \`node_modules/**/dist/*.js\` to find them (measured: 49 such commands in one run, all of them for options that were already in the surface).
 2. ThrottlerModule — per-route or global rate limiting.
 3. ValidationPipe with Zod schemas on every @Body input.
 4. GraphQLModule: introspection off in production + security limits (depth/complexity/aliases).
@@ -695,6 +695,11 @@ export const RECIPE_TASKS: Record<string, { topic: string; section: string }> = 
   'security-baseline': { topic: 'recipes', section: SECTION_ALIASES['security'] },
   helmet: { topic: 'security-checklist', section: 'security-checklist' },
   csrf: { topic: 'security-checklist', section: 'security-checklist' },
+  'security-module-options': { topic: 'api-surface', section: 'orbit-security' },
+  'security-options': { topic: 'api-surface', section: 'orbit-security' },
+  'csrf-options': { topic: 'api-surface', section: 'orbit-security' },
+  'helmet-options': { topic: 'api-surface', section: 'orbit-security' },
+  'cors-options': { topic: 'api-surface', section: 'orbit-core' },
   'database-wiring': { topic: 'recipes', section: SECTION_ALIASES['database'] },
   'install-database': { topic: 'recipes', section: SECTION_ALIASES['install'] },
   migrations: { topic: 'recipes', section: SECTION_ALIASES['migrations'] },

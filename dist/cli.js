@@ -669,6 +669,7 @@ Rules:
     content: `Minimum hardening for an Orbit backend:
 
 1. SecurityModule.forRoot({ helmet: {}, csrf: { ignoreMethods: ['GET', 'HEAD'] } }) \u2014 sets OWASP-recommended headers (HSTS, nosniff, frameguard, COOP/CORP) and double-submit CSRF. Both options are objects-or-false, never \`true\`: \`helmet?: HelmetOptions | false\`, \`csrf?: CsrfOptions | false\`. Writing \`{ helmet: true, csrf: true }\` is a type error.
+   The members of every option interface are in the generated surface: read \`{ symbol: 'SecurityModuleOptions' }\`, \`{ symbol: 'CsrfOptions' }\`, \`{ symbol: 'HelmetOptions' }\` or \`{ symbol: 'CorsOptions' }\` \u2014 do not grep \`node_modules/**/dist/*.js\` to find them (measured: 49 such commands in one run, all of them for options that were already in the surface).
 2. ThrottlerModule \u2014 per-route or global rate limiting.
 3. ValidationPipe with Zod schemas on every @Body input.
 4. GraphQLModule: introspection off in production + security limits (depth/complexity/aliases).
@@ -1171,6 +1172,11 @@ var RECIPE_TASKS = {
   "security-baseline": { topic: "recipes", section: SECTION_ALIASES["security"] },
   helmet: { topic: "security-checklist", section: "security-checklist" },
   csrf: { topic: "security-checklist", section: "security-checklist" },
+  "security-module-options": { topic: "api-surface", section: "orbit-security" },
+  "security-options": { topic: "api-surface", section: "orbit-security" },
+  "csrf-options": { topic: "api-surface", section: "orbit-security" },
+  "helmet-options": { topic: "api-surface", section: "orbit-security" },
+  "cors-options": { topic: "api-surface", section: "orbit-core" },
   "database-wiring": { topic: "recipes", section: SECTION_ALIASES["database"] },
   "install-database": { topic: "recipes", section: SECTION_ALIASES["install"] },
   migrations: { topic: "recipes", section: SECTION_ALIASES["migrations"] },
@@ -1219,17 +1225,20 @@ var TOOLS = [
   {
     name: "orbit_knowledge_read",
     annotations: { title: "orbit knowledge read", readOnlyHint: true },
-    description: "Read one Orbit knowledge topic by id (use orbit_knowledge_topics first). Pass section to fetch only one part of a large topic, which is much cheaper after a context compaction.",
+    description: "Read Orbit knowledge. Pass id for a topic, id+section for one section of it, section alone for a short alias such as throttler or database, or symbol for a single export. Start with orbit_knowledge_topics. Nothing is strictly required, but pass at least one of id, section or symbol.",
     inputSchema: {
       type: "object",
       properties: {
-        id: { type: "string", description: "Topic id from orbit_knowledge_topics" },
+        id: { type: "string", description: "Topic id from orbit_knowledge_topics; optional when section or symbol is given." },
         section: {
           type: "string",
-          description: "Optional section id from orbit_knowledge_topics, e.g. throttler or database. Omit for the whole topic."
+          description: "Section id, or a short alias such as throttler, database, migrations or security. Works with or without id."
+        },
+        symbol: {
+          type: "string",
+          description: "One exported symbol, e.g. ThrottlerGuard; answers with its package and the declaration line."
         }
-      },
-      required: ["id"]
+      }
     }
   },
   {

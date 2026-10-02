@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { handleRequest } from './server';
+import { TOOLS, executeTool } from './tools';
 
 describe('orbit-mcp server', () => {
   test('initialize returns protocol version and capabilities', () => {
@@ -328,6 +329,48 @@ describe('orbit_environment tool', () => {
       expect(out).toContain('scaffold/install first');
     } finally {
       rmSync(empty, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('tool input schemas match the documented call shapes', () => {
+  // The harness validates arguments against inputSchema before the call ever reaches the server, so a
+  // schema that requires an argument the implementation treats as optional makes a documented call
+  // impossible. That is how orbit_knowledge_read rejected { section } and { symbol } — both documented
+  // by the skill — with "data must have required property 'id'" in the 2026-10-02 gymflow run.
+  const tool = (name: string) => TOOLS.find(entry => entry.name === name)!;
+  const declared = (entry: any) => Object.keys(entry.inputSchema.properties ?? {});
+  const validate = (entry: any, args: Record<string, unknown>) => {
+    for (const key of entry.inputSchema.required ?? []) if (!(key in args)) return 'missing required ' + key;
+    for (const key of Object.keys(args)) if (!declared(entry).includes(key)) return 'undeclared argument ' + key;
+    return undefined;
+  };
+
+  test('orbit_knowledge_read accepts every shape the skill documents', () => {
+    const shapes = [{}, { id: 'api-surface' }, { section: 'throttler' }, { symbol: 'ThrottlerGuard' }, { id: 'api-surface', section: 'orbit-core' }];
+    for (const args of shapes) expect(validate(tool('orbit_knowledge_read'), args)).toBeUndefined();
+  });
+
+  test('every validated shape really answers at runtime', () => {
+    for (const args of [{ section: 'throttler' }, { symbol: 'ThrottlerGuard' }, { id: 'api-surface', section: 'orbit-core' }]) {
+      const out = executeTool('orbit_knowledge_read', args).content[0].text;
+      expect(out.length).toBeGreaterThan(80);
+      // Not an error answer: those start with the routing failure text, while a real section may
+      // legitimately mention a symbol whose name contains "Unknown".
+      expect(out.startsWith('Unknown') || out.startsWith('Pass { id }')).toBe(false);
+    }
+  });
+
+  test('every tool only requires properties it declares', () => {
+    for (const entry of TOOLS) {
+      for (const key of (entry.inputSchema as any).required ?? []) expect(declared(entry)).toContain(key);
+    }
+  });
+
+  test('tools with optional arguments stay reachable with no arguments', () => {
+    for (const name of ['orbit_knowledge_topics', 'orbit_knowledge_read', 'orbit_environment']) {
+      expect(validate(tool(name), {})).toBeUndefined();
+      expect(executeTool(name, {}).content[0].text.length).toBeGreaterThan(20);
     }
   });
 });

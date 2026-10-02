@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "orbit-mcp",
   "display_name": "Orbit Framework MCP",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Model Context Protocol server for the Orbit framework — AI coding agents get framework knowledge, scaffolding (REST + GraphQL), and a security review tool.",
   "author": {
     "name": "Galaxy Orbit"
