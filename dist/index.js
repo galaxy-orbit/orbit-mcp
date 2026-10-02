@@ -1449,17 +1449,17 @@ ${section.body}`);
       const scope = join(root, "node_modules", "@galaxy-stack");
       let names = [];
       try {
-        names = readdirSync(scope).filter((name2) => name2.startsWith("orbit-") || name2 === "galaxy-ui" || name2.startsWith("nebula"));
+        names = readdirSync(scope).filter((name) => name.startsWith("orbit-") || name === "galaxy-ui" || name.startsWith("nebula"));
       } catch {
         return text(`No ${scope} directory. The project at ${root} has no @galaxy-stack packages installed yet \u2014 scaffold/install first, or pass projectRoot.`);
       }
       const installed = [];
-      for (const name2 of names.sort()) {
+      for (const name of names.sort()) {
         try {
-          const manifest = JSON.parse(readFileSync(join(scope, name2, "package.json"), "utf8"));
-          installed.push({ name: name2, version: typeof manifest.version === "string" ? manifest.version : "unknown" });
+          const manifest = JSON.parse(readFileSync(join(scope, name, "package.json"), "utf8"));
+          installed.push({ name, version: typeof manifest.version === "string" ? manifest.version : "unknown" });
         } catch {
-          installed.push({ name: name2, version: "unreadable package.json" });
+          installed.push({ name, version: "unreadable package.json" });
         }
       }
       const generated = new Map(API_SURFACE_PACKAGES.map((entry) => [entry.name, entry.version]));
@@ -1483,9 +1483,9 @@ ${section.body}`);
 `));
     }
     case "orbit_scaffold_module": {
-      const name2 = String(args.name || "feature");
-      const kebab = name2.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-      const cls = pascal(name2);
+      const name = String(args.name || "feature");
+      const kebab = name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+      const cls = pascal(name);
       const files = [];
       files.push(`// src/${kebab}/${kebab}.module.ts
 import { Module } from '@galaxy-stack/orbit-core';
@@ -1565,9 +1565,9 @@ describe('${cls}Service', () => {
 `));
     }
     case "orbit_scaffold_graphql": {
-      const name2 = String(args.name || "feature");
-      const kebab = name2.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-      const cls = pascal(name2);
+      const name = String(args.name || "feature");
+      const kebab = name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+      const cls = pascal(name);
       const loader = args.withLoaders ? `
   @ResolveField(() => Author)
   author(@Parent() parent: ${cls}, @Loader('authorLoader') loader: DataLoader) {
@@ -1824,12 +1824,12 @@ async function serveStdio(input = process.stdin, output = process.stdout) {
 }
 if (false) {}
 export {
-  serveStdio,
-  handleRequest,
-  getKnowledge,
-  executeTool,
-  TOOLS,
-  SERVER_INFO,
+  KNOWLEDGE,
   PROTOCOL_VERSION,
-  KNOWLEDGE
+  SERVER_INFO,
+  TOOLS,
+  executeTool,
+  getKnowledge,
+  handleRequest,
+  serveStdio
 };
