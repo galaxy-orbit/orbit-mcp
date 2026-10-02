@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-stack/orbit-mcp",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Model Context Protocol server for Orbit framework — AI coding agents get framework knowledge, scaffolding, and security review tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,6 +21,7 @@
     "start": "bun run src/server.ts",
     "changeset": "changeset",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "bundle:refresh": "python3 scripts/refresh-bundle.py",
     "generate:surface": "node scripts/generate-api-surface.mjs",
     "check:surface": "node scripts/generate-api-surface.mjs --check",
     "smoke": "node scripts/smoke.mjs",

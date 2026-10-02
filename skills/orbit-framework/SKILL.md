@@ -5,7 +5,13 @@ description: >
   (@galaxy-stack/orbit-*), a NestJS-style framework optimized for the Bun
   runtime. Use when creating modules, controllers, providers, GraphQL APIs,
   microservices, or when migrating from NestJS to Orbit.
-version: 1.0.0
+version: 1.1.0
+# The companion server is installed separately and the harness validates every call against the
+# schema it declares, so this skill states the version its documented call shapes need. 0.4.0
+# declared orbit_knowledge_read { id } as required and had no symbol argument, which rejected the
+# { symbol } and { section } shapes taught below.
+requires:
+  orbit: ">=0.4.1"
 ---
 
 # Orbit Framework Skill

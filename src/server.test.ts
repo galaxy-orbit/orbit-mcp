@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { handleRequest } from './server';
@@ -372,6 +372,48 @@ describe('tool input schemas match the documented call shapes', () => {
       expect(validate(tool(name), {})).toBeUndefined();
       expect(executeTool(name, {}).content[0].text.length).toBeGreaterThan(20);
     }
+  });
+
+  /**
+   * The other half of the contract: the skill that ships with blackhole-cli routes the model to these
+   * tools, and the host validates the call against the schema this server declares. A shape the skill
+   * teaches but the schema rejects is a call that never arrives — measured as four
+   * "data must have required property 'id'" failures in the 2026-10-02 gymflow run.
+   */
+  const skill = readFileSync(join(import.meta.dir, '..', 'skills', 'orbit-framework', 'SKILL.md'), 'utf8');
+
+  test('every tool the skill routes to exists in this server', () => {
+    const named = [...new Set(skill.match(/orbit_[a-z_]+/g) ?? [])];
+    expect(named.length).toBeGreaterThan(4);
+    for (const name of named) expect(TOOLS.map(entry => entry.name)).toContain(name);
+  });
+
+  test('every shape the skill teaches is accepted by the schema and answers at runtime', () => {
+    // [tool, arguments, the text the skill must keep teaching for this shape]
+    const documented: Array<[string, Record<string, unknown>, string]> = [
+      ['orbit_knowledge_read', { id: 'api-surface' }, '{ id }'],
+      ['orbit_knowledge_read', { id: 'api-surface', section: 'orbit-core' }, '{ id: "api-surface", section: "orbit-core" }'],
+      ['orbit_knowledge_read', { section: 'throttler' }, '{ section: "throttler" }'],
+      ['orbit_knowledge_read', { symbol: 'ThrottlerGuard' }, '{ symbol: "ThrottlerGuard" }'],
+      ['orbit_knowledge_read', { section: 'database' }, '{ section: "database" }'],
+      ['orbit_recipe', { task: 'throttle-per-route' }, 'orbit_recipe { task: "throttle-per-route" }'],
+    ];
+    for (const [name, args, taught] of documented) {
+      expect(skill).toContain(taught);
+      expect(validate(tool(name), args)).toBeUndefined();
+      const answered = executeTool(name, args).content[0].text;
+      expect(answered.length).toBeGreaterThan(60);
+      expect(answered.startsWith('Unknown')).toBe(false);
+    }
+  });
+
+  test('the version the skill requires is one this repo can actually ship', () => {
+    const required = /requires:\s*\n\s*orbit:\s*">=(\d+\.\d+\.\d+)"/.exec(skill)?.[1];
+    expect(required).toBeDefined();
+    const shipped = JSON.parse(readFileSync(join(import.meta.dir, '..', 'package.json'), 'utf8')).version as string;
+    const rank = (value: string) => value.split('.').map(Number).reduce((acc, part) => acc * 1000 + part, 0);
+    // A skill that demands a server newer than this repo publishes would reject the build it ships with.
+    expect(rank(shipped)).toBeGreaterThanOrEqual(rank(required!));
   });
 });
 
